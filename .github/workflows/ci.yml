@@ -1,0 +1,35 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+          # No uv.lock is committed, and the default glob (**/uv.lock) makes setup-uv
+          # fail outright when it matches nothing.
+          cache-dependency-glob: "**/pyproject.toml"
+      - run: uv sync --all-groups
+
+      - name: Lint
+        run: |
+          uv run ruff check src tests
+          uv run ruff format --check src tests
+
+      # The whole suite runs without a GPU or a model: everything under test is the code
+      # that decides, and none of it calls out.
+      - name: Test
+        run: uv run pytest -q
+
+      - name: The tool reviews its own diff
+        # Dogfooding, and a real smoke test of the git plumbing. It must not fail the
+        # build on a finding - a finding here is information, not an error.
+        run: |
+          git fetch origin main --depth 50 || true
+          uv run pr-referee review . --base HEAD~1 --head HEAD || true
