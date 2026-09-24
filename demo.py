@@ -23,11 +23,15 @@ ROOT = Path(__file__).resolve().parent
 
 
 def main() -> int:
-    print('pr-referee: can it tell a behaviour-changing diff from an equivalent one?', flush=True)
+    print("pr-referee: can it tell a behaviour-changing diff from an equivalent one?", flush=True)
     print(flush=True)
     result = subprocess.run(
-        [sys.executable, "-m", 'pr_referee.cli',
-            *['bench', 'targets/toolz', '--no-llm', '--limit', '5']],
+        [
+            sys.executable,
+            "-m",
+            "pr_referee.cli",
+            *["bench", "targets/toolz", "--no-llm", "--limit", "5"],
+        ],
         cwd=ROOT,
         env={**os.environ, "PYTHONPATH": str(ROOT / "src"), "PYTHONIOENCODING": "utf-8"},
         check=False,
@@ -36,9 +40,9 @@ def main() -> int:
         return result.returncode
     print(flush=True)
     for line in (
-        'Run the full referee, with the model, using:',
-        '    pr-referee review <repo>',
-        '    pr-referee bench <repo>            # add --no-llm to skip the model',
+        "Run the full referee, with the model, using:",
+        "    pr-referee review <repo>",
+        "    pr-referee bench <repo>            # add --no-llm to skip the model",
     ):
         print(line, flush=True)
     return 0
